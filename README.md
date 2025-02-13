@@ -1,6 +1,8 @@
 # 🐶 Gimdog Utilities 🧰
 <img src="gd_utils_logo.png" alt="Logo" width="200" height="200">
 
+**Version: 0.1.0**
+
 A collection of Python utility functions that I always found myself rewriting.
 This repository aims to provide a centralized and readily available set of common functions to avoid redundant code across projects.
 
