@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from .preprocessing import normalize2uint8, tensor2image
 
 
-def show_image(image: np.ndarray | torch.Tensor, title: str | None = None) -> None:
+def show_image(image: np.ndarray | torch.Tensor, title: str | None = None, cmap: str | None = None) -> None:
     """
     Display a single image using matplotlib.
 
@@ -18,6 +18,8 @@ def show_image(image: np.ndarray | torch.Tensor, title: str | None = None) -> No
         Image to display.
     title : str, optional
         Title for the image. Default is None.
+    cmap : str, optional
+        Colormap to use for displaying the image. Default is None.
     """
     # Create a deep copy of the image to avoid modifying the original
     image_copy = copy.deepcopy(image)
@@ -32,7 +34,7 @@ def show_image(image: np.ndarray | torch.Tensor, title: str | None = None) -> No
 
     # Display the image using matplotlib
     plt.figure()
-    plt.imshow(image_copy)
+    plt.imshow(image_copy, cmap=cmap)
     plt.title(title)
     plt.axis("off")
     plt.show()
@@ -42,6 +44,7 @@ def show_images(
     images: list[np.ndarray | torch.Tensor],
     num_cols: int = 4,
     titles: list[str] | None = None,
+    cmap: str | None = None,
 ) -> None:
     """
     Display a list of images in a grid format using matplotlib.
@@ -54,6 +57,8 @@ def show_images(
         Number of columns in the grid. Default is 4.
     titles : list of str, optional
         List of titles for each image. Default is None.
+    cmap : str, optional
+        Colormap to use for displaying the images. Default is None.
     """
     # Create a deep copy of the images to avoid modifying the originals
     images_copy = copy.deepcopy(images)
@@ -75,8 +80,7 @@ def show_images(
         if image.dtype != np.uint8:
             image = normalize2uint8(image)
 
-        # Display the image in the subplot
-        axes[i].imshow(image)
+        axes[i].imshow(image, cmap=cmap)
 
         # Set the title if provided
         if titles is not None and i < len(titles):
@@ -97,6 +101,7 @@ def show_images_with_reference(
     single_image: np.ndarray | torch.Tensor | None = None,
     num_cols: int = 4,
     titles: list[str] | None = None,
+    cmap: str | None = None,
 ) -> None:
     """
     Display a grid of images with an optional reference image in each row.
@@ -111,6 +116,8 @@ def show_images_with_reference(
         Number of columns of images to display (excluding the reference image column). Defaults to 4.
     titles : list of str, optional
         List of titles for each image. Defaults to None.
+    cmap : str, optional
+        Colormap to use for displaying the images. Default is None.
     """
     # Create deep copies of the images to avoid modifying the originals
     images_copy = copy.deepcopy(images)
@@ -135,8 +142,7 @@ def show_images_with_reference(
             if single_image_copy.dtype != np.uint8:
                 single_image_copy = normalize2uint8(single_image_copy)
 
-            # Display the reference image in the first column of the row
-            axes[row * (num_cols + 1)].imshow(single_image_copy)
+            axes[row * (num_cols + 1)].imshow(single_image_copy, cmap=cmap)
             axes[row * (num_cols + 1)].set_title("Ref Image")
             axes[row * (num_cols + 1)].axis("off")
         else:
@@ -155,8 +161,7 @@ def show_images_with_reference(
                 if image.dtype != np.uint8:
                     image = normalize2uint8(image)
 
-                # Display the image in the subplot
-                axes[row * (num_cols + 1) + col + 1].imshow(image)
+                axes[row * (num_cols + 1) + col + 1].imshow(image, cmap=cmap)
 
                 # Set the title if provided
                 if titles is not None and idx < len(titles):
@@ -171,7 +176,7 @@ def show_images_with_reference(
 
 
 def show_image_with_mask_outlines(
-    image: np.ndarray | torch.Tensor, masks: np.ndarray, mask_colors: list[tuple[int]]
+    image: np.ndarray | torch.Tensor, masks: np.ndarray, mask_colors: list[tuple[int]], cmap: str = "gray"
 ) -> None:
     """
     Draw mask outlines on an image.
@@ -184,6 +189,8 @@ def show_image_with_mask_outlines(
         A 3D array where each slice along the third axis is a binary mask.
     mask_colors : list of tuples of int
         A list of colors corresponding to each mask.
+    cmap : str, optional
+        Colormap to use for displaying the image. Default is None.
     """
     # Convert torch.Tensor to numpy array if necessary
     if isinstance(image, torch.Tensor):
@@ -205,7 +212,6 @@ def show_image_with_mask_outlines(
                 contour[:, 1], contour[:, 0], linewidth=2, color=np.array(color) / 255
             )
 
-    # Display the image with mask outlines
-    plt.imshow(outlined_image)
+    plt.imshow(outlined_image, cmap=cmap)
     plt.axis("off")
     plt.show()
