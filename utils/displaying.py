@@ -8,7 +8,9 @@ from matplotlib import pyplot as plt
 from .preprocessing import normalize2uint8, tensor2image
 
 
-def show_image(image: np.ndarray | torch.Tensor, title: str | None = None, cmap: str | None = None) -> None:
+def show_image(
+    image: np.ndarray | torch.Tensor, title: str | None = None, cmap: str | None = None
+) -> None:
     """
     Display a single image using matplotlib.
 
@@ -175,8 +177,51 @@ def show_images_with_reference(
     plt.show()
 
 
+def draw_mask_outlines(image, mask, color=(0, 255, 0)):
+    """
+    Draws the outlines of a mask on an image.
+    Parameters:
+    image (numpy.ndarray or torch.Tensor): The input image on which to draw the mask outlines.
+                                            If a torch.Tensor is provided, it will be converted to a numpy array.
+    mask (numpy.ndarray or torch.Tensor): The binary mask indicating the regions to outline.
+                                            If a torch.Tensor is provided, it will be converted to a numpy array.
+    color (tuple): A tuple representing the RGB color of the mask outlines. Default is green (0, 255, 0).
+    Returns:
+    numpy.ndarray: The image with the mask outlines drawn on it.
+    """
+    # Convert torch.Tensor to numpy array if necessary
+    if isinstance(image, torch.Tensor):
+        outlined_image = tensor2image(image)
+    else:
+        outlined_image = image.copy()
+
+    # Ensure the image is in uint8 format for matplotlib
+    if outlined_image.dtype != np.uint8:
+        outlined_image = normalize2uint8(outlined_image)
+
+    # Convert torch.Tensor to numpy array if necessary
+    if isinstance(mask, torch.Tensor):
+        mask_copy = tensor2image(mask)
+    else:
+        if mask.ndim == 3 and mask.shape[0] == 1:
+            mask_copy = mask[0].copy()
+        else:
+            mask_copy = mask.copy()
+
+    # Find contours of the mask
+    contours = skimage.measure.find_contours(mask_copy, 0.5)
+    for contour in contours:
+        # Draw the contour on the image
+        plt.plot(contour[:, 1], contour[:, 0], linewidth=2, color=np.array(color) / 255)
+
+    return outlined_image
+
+
 def show_image_with_mask_outlines(
-    image: np.ndarray | torch.Tensor, masks: np.ndarray, mask_colors: list[tuple[int]], cmap: str = "gray"
+    image: np.ndarray | torch.Tensor,
+    masks: np.ndarray,
+    mask_colors: list[tuple[int]],
+    cmap: str = "gray",
 ) -> None:
     """
     Draw mask outlines on an image.
@@ -194,7 +239,7 @@ def show_image_with_mask_outlines(
     """
     # Convert torch.Tensor to numpy array if necessary
     if isinstance(image, torch.Tensor):
-        outlined_image = image.permute(1, 2, 0).numpy()
+        outlined_image = tensor2image(image)
     else:
         outlined_image = image.copy()
 
@@ -202,16 +247,11 @@ def show_image_with_mask_outlines(
     if outlined_image.dtype != np.uint8:
         outlined_image = normalize2uint8(outlined_image)
 
+    # Draw the mask outlines on the image
     for i, mask in enumerate(masks):
-        color = mask_colors[i]
-        # Find contours of the mask
-        contours = skimage.measure.find_contours(mask, 0.5)
-        for contour in contours:
-            # Draw the contour on the image
-            plt.plot(
-                contour[:, 1], contour[:, 0], linewidth=2, color=np.array(color) / 255
-            )
+        outlined_image = draw_mask_outlines(outlined_image, mask, mask_colors[i])
 
-    plt.imshow(outlined_image, cmap=cmap)
+    # Display the image with mask outlines
+    plt.imshow(outlined_image)
     plt.axis("off")
     plt.show()
