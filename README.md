@@ -1,5 +1,5 @@
 # 🐶 Gimdog Utilities 🧰
-<img src="gd_utils_logo.png" alt="Logo" width="200" height="200">
+<img src="gimdog_toolbox.jpg" alt="Logo" width="200" height="200">
 
 **Version: 0.1.0**
 
