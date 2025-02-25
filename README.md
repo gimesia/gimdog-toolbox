@@ -1,4 +1,4 @@
-# 🐶 Gimdog Utilities 🧰
+# 🐶 Gimdog Toolbox 🧰
 <img src="gimdog_toolbox.jpg" alt="Logo" width="200" height="200">
 
 **Version: 0.1.0**
