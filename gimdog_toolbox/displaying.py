@@ -1,5 +1,6 @@
 import copy
 
+import cv2
 import numpy as np
 import skimage
 import torch
@@ -8,20 +9,18 @@ from matplotlib import pyplot as plt
 from .preprocessing import normalize2uint8, tensor2image
 
 
-def show_image(
-    image: np.ndarray | torch.Tensor, title: str | None = None, cmap: str | None = None
-) -> None:
+def show_image(image, title=None, cmap=None):
     """
     Display a single image using matplotlib.
 
     Parameters
     ----------
-    image : ndarray or torch.Tensor
+    image : ndarray
         Image to display.
     title : str, optional
         Title for the image. Default is None.
     cmap : str, optional
-        Colormap to use for displaying the image. Default is None.
+        Colormap to use for displaying the image. Default is None, which uses the default colormap.
     """
     # Create a deep copy of the image to avoid modifying the original
     image_copy = copy.deepcopy(image)
@@ -42,18 +41,13 @@ def show_image(
     plt.show()
 
 
-def show_images(
-    images: list[np.ndarray | torch.Tensor],
-    num_cols: int = 4,
-    titles: list[str] | None = None,
-    cmap: str | None = None,
-) -> None:
+def show_images(images, num_cols=4, titles=None, cmap=None):
     """
     Display a list of images in a grid format using matplotlib.
 
     Parameters
     ----------
-    images : list of ndarray or torch.Tensor
+    images : list of ndarray
         List of images to display.
     num_cols : int, optional
         Number of columns in the grid. Default is 4.
@@ -72,23 +66,27 @@ def show_images(
     axes = axes.flatten()
 
     for i in range(num_images):
-        image = images_copy[i]
+        try:
+            image = images_copy[i]
 
-        # Convert torch.Tensor to numpy array if necessary
-        if isinstance(image, torch.Tensor):
-            image = tensor2image(image)
+            # Convert torch.Tensor to numpy array if necessary
+            if isinstance(image, torch.Tensor):
+                image = tensor2image(image)
 
-        # Ensure the image is in uint8 format
-        if image.dtype != np.uint8:
-            image = normalize2uint8(image)
+            # Ensure the image is in uint8 format
+            if image.dtype != np.uint8:
+                image = normalize2uint8(image)
 
-        axes[i].imshow(image, cmap=cmap)
+            # Display the image in the subplot
+            axes[i].imshow(image, cmap=cmap)
 
-        # Set the title if provided
-        if titles is not None and i < len(titles):
-            axes[i].set_title(titles[i])
+            # Set the title if provided
+            if titles is not None and i < len(titles):
+                axes[i].set_title(titles[i])
 
-        axes[i].axis("off")
+            axes[i].axis("off")
+        except Exception as e:
+            print(f"Error displaying image {i}: {e}")
 
     # Turn off any unused subplots
     for i in range(num_images, len(axes)):
@@ -123,9 +121,7 @@ def show_images_with_reference(
     """
     # Create deep copies of the images to avoid modifying the originals
     images_copy = copy.deepcopy(images)
-    single_image_copy = (
-        copy.deepcopy(single_image) if single_image is not None else None
-    )
+    single_image_copy = copy.deepcopy(single_image) if single_image is not None else None
 
     num_images = len(images_copy)
     num_rows = (num_images + num_cols - 1) // num_cols
@@ -144,6 +140,7 @@ def show_images_with_reference(
             if single_image_copy.dtype != np.uint8:
                 single_image_copy = normalize2uint8(single_image_copy)
 
+            # Display the reference image in the first column of the row
             axes[row * (num_cols + 1)].imshow(single_image_copy, cmap=cmap)
             axes[row * (num_cols + 1)].set_title("Ref Image")
             axes[row * (num_cols + 1)].axis("off")
@@ -163,6 +160,7 @@ def show_images_with_reference(
                 if image.dtype != np.uint8:
                     image = normalize2uint8(image)
 
+                # Display the image in the subplot
                 axes[row * (num_cols + 1) + col + 1].imshow(image, cmap=cmap)
 
                 # Set the title if provided
@@ -177,7 +175,7 @@ def show_images_with_reference(
     plt.show()
 
 
-def draw_mask_outlines(image, mask, color=(0, 255, 0)):
+def draw_mask_outlines(image, mask, color=(0, 255, 0), thickness=3):
     """
     Draws the outlines of a mask on an image.
     Parameters:
@@ -199,6 +197,10 @@ def draw_mask_outlines(image, mask, color=(0, 255, 0)):
     if outlined_image.dtype != np.uint8:
         outlined_image = normalize2uint8(outlined_image)
 
+    # Ensure the outlined image is 3-channel
+    if outlined_image.ndim == 2:
+        outlined_image = skimage.color.gray2rgb(outlined_image)
+
     # Convert torch.Tensor to numpy array if necessary
     if isinstance(mask, torch.Tensor):
         mask_copy = tensor2image(mask)
@@ -209,10 +211,44 @@ def draw_mask_outlines(image, mask, color=(0, 255, 0)):
             mask_copy = mask.copy()
 
     # Find contours of the mask
-    contours = skimage.measure.find_contours(mask_copy, 0.5)
-    for contour in contours:
-        # Draw the contour on the image
-        plt.plot(contour[:, 1], contour[:, 0], linewidth=2, color=np.array(color) / 255)
+    contours, _ = cv2.findContours(normalize2uint8(mask_copy), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(outlined_image, contours, -1, color, thickness)
+
+    return outlined_image
+
+def draw_multiple_masks(image, masks, colors, thickness=3):
+    """
+    Draw multiple masks on an image.
+
+    Parameters
+    ----------
+    image : ndarray
+        The image on which to draw the masks.
+    masks : list of ndarray
+        A list of binary masks to draw on the image.
+    colors : list of tuple
+        A list of colors corresponding to each mask.
+    thickness : int, optional
+        Thickness of the mask outlines. Default is 3.
+
+    Returns
+    -------
+    ndarray
+        The image with the masks drawn on it.
+    """
+    # Convert torch.Tensor to numpy array if necessary
+    if isinstance(image, torch.Tensor):
+        outlined_image = tensor2image(image)
+    else:
+        outlined_image = image.copy()
+
+    # Ensure the image is in uint8 format for matplotlib
+    if outlined_image.dtype != np.uint8:
+        outlined_image = normalize2uint8(outlined_image)
+
+    # Draw each mask on the image
+    for i, mask in enumerate(masks):
+        outlined_image = draw_mask_outlines(outlined_image, mask, colors[i], thickness)
 
     return outlined_image
 
@@ -221,6 +257,7 @@ def show_image_with_mask_outlines(
     image: np.ndarray | torch.Tensor,
     masks: np.ndarray,
     mask_colors: list[tuple[int]],
+    thickness: int = 3,
     cmap: str = "gray",
 ) -> None:
     """
@@ -234,6 +271,7 @@ def show_image_with_mask_outlines(
         A 3D array where each slice along the third axis is a binary mask.
     mask_colors : list of tuples of int
         A list of colors corresponding to each mask.
+    thickness : int, optional
     cmap : str, optional
         Colormap to use for displaying the image. Default is None.
     """
@@ -249,7 +287,7 @@ def show_image_with_mask_outlines(
 
     # Draw the mask outlines on the image
     for i, mask in enumerate(masks):
-        outlined_image = draw_mask_outlines(outlined_image, mask, mask_colors[i])
+        outlined_image = draw_mask_outlines(outlined_image, mask, mask_colors[i], thickness)
 
     # Display the image with mask outlines
     plt.imshow(outlined_image)
