@@ -1,15 +1,18 @@
 import unittest
+
 import numpy as np
 import torch
+
 from gimdog_toolbox.preprocessing import (
-    tensor2image,
     image2tensor,
-    normalize2uint8,
-    normalize2int8,
     normalize2float,
-    normalize2uint16,
+    normalize2int8,
     normalize2int16,
+    normalize2uint8,
+    normalize2uint16,
+    tensor2image,
 )
+
 
 class TestPreprocessing(unittest.TestCase):
 
@@ -34,12 +37,16 @@ class TestPreprocessing(unittest.TestCase):
     def test_normalize2uint8(self):
         normalized_image = normalize2uint8(self.image_2d)
         self.assertEqual(normalized_image.dtype, np.uint8)
-        self.assertTrue((normalized_image >= 0).all() and (normalized_image <= 255).all())
+        self.assertTrue(
+            (normalized_image >= 0).all() and (normalized_image <= 255).all()
+        )
 
     def test_normalize2int8(self):
         normalized_image = normalize2int8(self.image_2d)
         self.assertEqual(normalized_image.dtype, np.int8)
-        self.assertTrue((normalized_image >= -128).all() and (normalized_image <= 127).all())
+        self.assertTrue(
+            (normalized_image >= -128).all() and (normalized_image <= 127).all()
+        )
 
     def test_normalize2float(self):
         normalized_image = normalize2float(self.image_2d)
@@ -49,12 +56,17 @@ class TestPreprocessing(unittest.TestCase):
     def test_normalize2uint16(self):
         normalized_image = normalize2uint16(self.image_2d)
         self.assertEqual(normalized_image.dtype, np.uint16)
-        self.assertTrue((normalized_image >= 0).all() and (normalized_image <= 65535).all())
+        self.assertTrue(
+            (normalized_image >= 0).all() and (normalized_image <= 65535).all()
+        )
 
     def test_normalize2int16(self):
         normalized_image = normalize2int16(self.image_2d)
         self.assertEqual(normalized_image.dtype, np.int16)
-        self.assertTrue((normalized_image >= -32768).all() and (normalized_image <= 32767).all())
+        self.assertTrue(
+            (normalized_image >= -32768).all() and (normalized_image <= 32767).all()
+        )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -121,7 +121,9 @@ def show_images_with_reference(
     """
     # Create deep copies of the images to avoid modifying the originals
     images_copy = copy.deepcopy(images)
-    single_image_copy = copy.deepcopy(single_image) if single_image is not None else None
+    single_image_copy = (
+        copy.deepcopy(single_image) if single_image is not None else None
+    )
 
     num_images = len(images_copy)
     num_rows = (num_images + num_cols - 1) // num_cols
@@ -211,10 +213,13 @@ def draw_mask_outlines(image, mask, color=(0, 255, 0), thickness=3):
             mask_copy = mask.copy()
 
     # Find contours of the mask
-    contours, _ = cv2.findContours(normalize2uint8(mask_copy), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(
+        normalize2uint8(mask_copy), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+    )
     cv2.drawContours(outlined_image, contours, -1, color, thickness)
 
     return outlined_image
+
 
 def draw_multiple_masks(image, masks, colors, thickness=3):
     """
@@ -287,7 +292,9 @@ def show_image_with_mask_outlines(
 
     # Draw the mask outlines on the image
     for i, mask in enumerate(masks):
-        outlined_image = draw_mask_outlines(outlined_image, mask, mask_colors[i], thickness)
+        outlined_image = draw_mask_outlines(
+            outlined_image, mask, mask_colors[i], thickness
+        )
 
     # Display the image with mask outlines
     plt.imshow(outlined_image)
