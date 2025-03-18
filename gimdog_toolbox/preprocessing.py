@@ -2,8 +2,29 @@ import cv2
 import numpy as np
 import torch
 
+import torch
+import numpy as np
+
 
 def tensor2image(tensor: torch.Tensor) -> np.ndarray:
+    """
+    Converts a PyTorch tensor into a NumPy image array.
+
+    Parameters
+    ----------
+    tensor : torch.Tensor
+        Input tensor with shape (H, W), (C, H, W), or (N, C, H, W).
+
+    Returns
+    -------
+    np.ndarray
+        Converted NumPy array with shape (H, W), (H, W, C), or (H, W, C) after removing batch dimension.
+
+    Raises
+    ------
+    ValueError
+        If the input tensor has an invalid shape.
+    """
     match tensor.ndim:
         case 2:
             return tensor.cpu().numpy()
@@ -12,10 +33,28 @@ def tensor2image(tensor: torch.Tensor) -> np.ndarray:
         case 4:
             return tensor.squeeze(0).permute(1, 2, 0).cpu().numpy()
         case _:
-            raise (ValueError("Invalid tensor shape"))
+            raise ValueError("Invalid tensor shape")
 
 
 def image2tensor(image: np.ndarray) -> torch.Tensor:
+    """
+    Converts a NumPy image array into a PyTorch tensor.
+
+    Parameters
+    ----------
+    image : np.ndarray
+        Input image array with shape (H, W), (H, W, C), or (N, H, W, C).
+
+    Returns
+    -------
+    torch.Tensor
+        Converted PyTorch tensor with shape (1, H, W), (C, H, W), or (N, C, H, W).
+
+    Raises
+    ------
+    ValueError
+        If the input image has an invalid shape.
+    """
     match image.ndim:
         case 2:
             return torch.from_numpy(image).unsqueeze(0)
@@ -24,7 +63,7 @@ def image2tensor(image: np.ndarray) -> torch.Tensor:
         case 4:
             return torch.from_numpy(image).permute(0, 3, 1, 2)
         case _:
-            raise (ValueError("Invalid image shape"))
+            raise ValueError("Invalid image shape")
 
 
 def normalize2uint8(image: np.ndarray | torch.Tensor) -> np.ndarray | torch.Tensor:
