@@ -67,6 +67,19 @@ def image2tensor(image: np.ndarray) -> torch.Tensor:
 
 
 def normalize2uint8(image: np.ndarray | torch.Tensor) -> np.ndarray | torch.Tensor:
+    """
+    Normalize an image or tensor to 8-bit unsigned integer type.
+
+    Parameters
+    ----------
+    image : np.ndarray or torch.Tensor
+        Input image or tensor.
+
+    Returns
+    -------
+    np.ndarray or torch.Tensor
+        Normalized image or tensor.
+    """
     is_tensor = isinstance(image, torch.Tensor)
     if is_tensor:
         image = tensor2image(image)
@@ -84,6 +97,19 @@ def normalize2uint8(image: np.ndarray | torch.Tensor) -> np.ndarray | torch.Tens
 
 
 def normalize2int8(image: np.ndarray | torch.Tensor) -> np.ndarray | torch.Tensor:
+    """
+    Normalize an image or tensor to 8-bit signed integer type.
+
+    Parameters
+    ----------
+    image : np.ndarray or torch.Tensor
+        Input image or tensor.
+
+    Returns
+    -------
+    np.ndarray or torch.Tensor
+        Normalized image or tensor.
+    """
     is_tensor = isinstance(image, torch.Tensor)
     if is_tensor:
         image = tensor2image(image)
@@ -101,6 +127,19 @@ def normalize2int8(image: np.ndarray | torch.Tensor) -> np.ndarray | torch.Tenso
 
 
 def normalize2float(image: np.ndarray | torch.Tensor) -> np.ndarray | torch.Tensor:
+    """
+    Normalize an image or tensor to 32-bit floating point type.
+
+    Parameters
+    ----------
+    image : np.ndarray or torch.Tensor
+        Input image or tensor.
+
+    Returns
+    -------
+    np.ndarray or torch.Tensor
+        Normalized image or tensor.
+    """
     is_tensor = isinstance(image, torch.Tensor)
     if is_tensor:
         image = tensor2image(image)
@@ -118,6 +157,19 @@ def normalize2float(image: np.ndarray | torch.Tensor) -> np.ndarray | torch.Tens
 
 
 def normalize2uint16(image: np.ndarray | torch.Tensor) -> np.ndarray | torch.Tensor:
+    """
+    Normalize an image or tensor to 16-bit unsigned integer type.
+
+    Parameters
+    ----------
+    image : np.ndarray or torch.Tensor
+        Input image or tensor.
+
+    Returns
+    -------
+    np.ndarray or torch.Tensor
+        Normalized image or tensor.
+    """
     is_tensor = isinstance(image, torch.Tensor)
     if is_tensor:
         image = tensor2image(image)
@@ -135,6 +187,19 @@ def normalize2uint16(image: np.ndarray | torch.Tensor) -> np.ndarray | torch.Ten
 
 
 def normalize2int16(image: np.ndarray | torch.Tensor) -> np.ndarray | torch.Tensor:
+    """
+    Normalize an image or tensor to 16-bit signed integer type.
+
+    Parameters
+    ----------
+    image : np.ndarray or torch.Tensor
+        Input image or tensor.
+
+    Returns
+    -------
+    np.ndarray or torch.Tensor
+        Normalized image or tensor.
+    """
     is_tensor = isinstance(image, torch.Tensor)
     if is_tensor:
         image = tensor2image(image)
