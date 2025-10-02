@@ -1,3 +1,10 @@
+"""
+Created in 2025 July
+
+@author: Aron Gimesi (https://github.com/gimesia)
+@contact: gimesiaron@gmail.com
+"""
+
 import time
 
 
