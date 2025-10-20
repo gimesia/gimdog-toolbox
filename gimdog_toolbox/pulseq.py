@@ -95,3 +95,50 @@ def run_sequence(seq: pp.Sequence, phantom, size, title="Result", plot=True):
         
         plt.tight_layout()
         plt.show()
+        
+
+def get_event_centers(seq, verbose=True):
+    """Get center points of all events in the sequence."""
+    cumulative_time = 0
+    event_centers = []
+    
+    for block_idx in range(len(seq.block_events)):
+        block = seq.get_block(block_idx + 1)
+        block_duration = pp.calc_duration(block)
+        
+        # Check for RF events
+        if hasattr(block, 'rf') and block.rf is not None:
+            rf_center = cumulative_time + block_duration / 2
+            event_centers.append({
+                'type': 'RF',
+                'block': block_idx + 1,
+                'center': rf_center,
+                'use': getattr(block.rf, 'use', 'unknown')
+            })
+        
+        # Check for ADC events
+        if hasattr(block, 'adc') and block.adc is not None:
+            # ADC center includes delay
+            adc_delay = getattr(block.adc, 'delay', 0)
+            adc_duration = getattr(block.adc, 'duration', 0)
+            adc_center = cumulative_time + adc_delay + adc_duration / 2
+            event_centers.append({
+                'type': 'ADC',
+                'block': block_idx + 1,
+                'center': adc_center,
+                'delay': adc_delay
+            })
+        
+        cumulative_time += block_duration
+    
+    if verbose:
+        print("Event centers:")
+        for event in event_centers:
+            print(f"{event['type']} (Block {event['block']}): {event['center']*1000:.3f} ms")
+            if event['type'] == 'RF':
+                print(f"  Use: {event.get('use', 'unknown')}")
+            elif event['type'] == 'ADC':
+                print(f"  Delay: {event.get('delay', 0)*1000:.3f} ms")
+    
+    return event_centers
+
