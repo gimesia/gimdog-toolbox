@@ -1,0 +1,50 @@
+name: Bump version and publish
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  version-bump:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   # allows pushing new tags and commits
+      id-token: write   # required for PyPI OIDC in future
+      packages: write   # allows publishing to GitHub Packages
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # required for commitizen changelog
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          pip install commitizen build twine
+ 
+      - name: Bump version and create changelog
+        id: bump
+        run: |
+          cz bump --yes --changelog
+          echo "new_version=$(cz version --project)" >> $GITHUB_OUTPUT
+
+      - name: Commit and push version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git push origin main --follow-tags
+
+      - name: Build package
+        run: python -m build
+
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: twine upload dist/*
