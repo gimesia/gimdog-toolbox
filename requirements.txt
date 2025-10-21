@@ -3,3 +3,5 @@ matplotlib~=3.9.2
 scikit-image~=0.24.0
 pytorch~=2.4.1
 opencv~=4.10.0
+pypulseq~=1.4.2.post1
+MRzeroCore~=0.4.1
