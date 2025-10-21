@@ -12,12 +12,26 @@ license = {text = "CC by 4.0"}
 authors = [
     { name="Áron Gimesi", email="aron.gimesi@tecnico.ulisboa.pt" }
 ]
+
 dependencies = [
-    "torch",
-    "numpy",
-    "opencv-python"
+    "numpy~=1.26.4",
+    "matplotlib~=3.9.2",
+    "scikit-image~=0.24.0",
+    "torch~=2.4.1",
+    "opencv-python~=4.10.0",
+    "pypulseq~=1.4.2.post1",
+    "MRzeroCore~=0.4.1"
 ]
 
 [project.urls]
 "Homepage" = "https://github.com/gimesia/gimdog-toolbox"
 "Issues" = "https://github.com/gimesia/gimdog-toolbox/issues"
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"
+version_files = [
+    "pyproject.toml:version"
+]
+tag_format = "v$version"
+update_changelog_on_bump = true
