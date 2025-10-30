@@ -13,6 +13,14 @@ import pulseq as pp
 import MRzeroCore as mr0
 
 
+# Define conversion lambdas for time units and angles.
+milli = lambda x: x * 1e-3                                  # ms to s
+micro = lambda x: x * 1e-6                                  # us to s
+nano = lambda x: x * 1e-9                                   # ns to s
+deg2rad = lambda x: (x * np.pi) / 180                       # degrees to radians
+align2rastertime = lambda x, rt: np.round(x / rt) * rt      # align time to raster time
+
+
 # Sequence simulator function
 def run_sequence(seq: pp.Sequence, phantom, size, title="Result", plot=True):
     """Run Pulseq sequence on phantom with mr0 simulator and plot results."""
@@ -142,3 +150,11 @@ def get_event_centers(seq, verbose=True):
     
     return event_centers
 
+def check_sequence_timing(seq: pp.Sequence):
+# Check sequence timing for hardware compatibility and safety.
+    ok, report = seq.check_timing()
+    if ok:
+        print("Timing check passed successfully.")
+    else:
+        print("Timing check failed. Report:")
+        print(report)
